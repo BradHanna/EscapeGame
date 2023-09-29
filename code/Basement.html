@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Escape If You Can!</title>
+    <style>
+body {
+  background-image: url('images/Basement.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.input-info {
+  width: 50%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 10px;
+  background-color: white;
+  opacity: 0.8;
+  text-align: center;
+  font-size: 18px;
+  color: black;
+  border-radius: 10px;
+}
+
+.typing-animation {
+  animation: typing 4s steps(30) forwards;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.options {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.option {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 15px;
+  width: 185px;
+  height: 100px;
+  border-radius: 70%;
+  background-color: #f32121;
+  color: black;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.transparent-button {
+  position: absolute;
+  top: 150px;
+  left: 300px;
+  background-color: transparent;
+  border: none;
+  width: 225px;
+  height: 225px;
+}
+
+.transparent-button2 {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: transparent;
+  border: none;
+  width: 1850px;
+  height: 850px;
+}
+
+.option:hover {
+  background-color: #615d5d;
+}
+
+.green-gas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #4CAF50;
+  opacity: 0.001;
+  z-index: -1;
+  animation: gas 184s linear;
+}
+
+@keyframes gas {
+  from {
+    opacity: 0.001;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <audio controls loop>
+      <source src="sounds/Background.mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+    <div class="input-info">
+      <p id="input-info-text" class="typing-animation">The basement, at last! You're safe... for now.</p>
+      <p id="new-info-text1" class="typing-animation">However, the relief of reaching the basement is short-lived as you realize something is amiss...</p>
+      <p id="new-info-text2" class="typing-animation">Be quick! The gas is approaching. What's your next move?</p>
+      <div class="options">
+        <div class="option" id="option1">Search the Room</div>
+        <div class="option" id="option2">Inspect the Window</div>
+        <div class="option" id="option3">Check the Toolbox</div>
+        <div class="option" id="option4">Return Upstairs</div>
+        <div style="display: none;" class="option" id="option5">Try the Radio</div>
+        <div style="display: none;" class="option" id="option6">Go Back</div>
+        <div style="display: none;" class="option" id="option7">Break The Window</div>
+        <div style="display: none;" class="option" id="option8">Climb Outside</div>
+        <div style="display: none;" class="option" id="option9">Grab The Hammer</div>
+        <div style="display: none;" class="option" id="option10">Grab The Screwdriver</div>
+        <div style="display: none;" class="option" id="option11">Continue Into The Next Room</div>
+        <div style="display: none;" class="option" id="option13">Attempt Your Escape!</div>
+        <div style="display: none;" class="option" id="option14">Continue Into The Next Room</div>
+        <div style="display: none;" class="option" id="option16">Attempt Your Escape!</div>
+      <p id="timer" style="display: none;"></p>
+      <p id="clickCount" class="typing-animation" style="display: none"></p>
+    </div>
+    <div style="display: none;" class="transparent-button" id="option12"></div>
+    <div style="display: none;" class="transparent-button" id="option15"></div>
+    <div style="display: none;" class="transparent-button2" id="option17"></div>
+    <div class="green-gas"></div>
+    <script>
+const inputInfoText = document.getElementById('input-info-text');
+const newInfoText1 = document.getElementById('new-info-text1');
+const newInfoText2 = document.getElementById('new-info-text2');
+const option1 = document.getElementById('option1');
+const option2 = document.getElementById('option2');
+const option3 = document.getElementById('option3');
+const option4 = document.getElementById('option4');
+const option5 = document.getElementById('option5');
+const option6 = document.getElementById('option6');
+const option7 = document.getElementById('option7');
+const option8 = document.getElementById('option8');
+const option9 = document.getElementById('option9');
+const option10 = document.getElementById('option10');
+const option11 = document.getElementById('option11');
+const option12 = document.getElementById('option12');
+const option13 = document.getElementById('option13');
+const option14 = document.getElementById('option14');
+const option15 = document.getElementById('option15');
+const option16 = document.getElementById('option16');
+const option17 = document.getElementById('option17');
+const timerDisplay = document.createElement('div');
+const timerSeconds = 180; // 3 minutes in seconds
+const clickCount = document.querySelector('#clickCount');
+let count = 0;
+let timeLeft = timerSeconds;
+let timerInterval;
+const greenGas = document.getElementById('.green-gas');
+
+// Timer display settings
+timerDisplay.style.textAlign = 'center';
+timerDisplay.style.fontSize = '24px';
+timerDisplay.style.color = 'white';
+timerDisplay.style.marginTop = '20px';
+timerDisplay.innerText = `Time remaining: ${Math.floor(timerSeconds / 60)}:00`;
+document.body.appendChild(timerDisplay);
+
+// Start the timer
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    timerDisplay.innerText = `Time remaining: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      gameOver();
+    }
+  }, 1000);
+}
+
+// Game over function
+function gameOver() {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'You failed to escape in time. The gas has overcome you. Game over.';
+  newInfoText2.innerHTML = '';
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'none';
+  option7.style.display = 'none';
+  option8.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  document.body.style.backgroundImage = "url('images/End.jpg')";
+  document.body.style.backgroundSize = 'cover';
+}
+
+// Show game info after 4 seconds
+setTimeout(() => {
+  inputInfoText.style.display = 'block';
+  newInfoText1.style.display = 'block';
+  newInfoText2.style.display = 'block';
+  startTimer();
+}, 4000);
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+}
+
+// Option 1 click event
+option1.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'You look around and see an old radio. Maybe you can use it to call for help?';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'block';
+  option6.style.display = 'block';
+});
+
+// Option 2 click event
+option2.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = "You decide to inspect the window. It's sealed shut, but you notice a loose brick nearby...";
+  newInfoText2.innerHTML = 'Maybe you can use it to break the window?';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'block';
+  option7.style.display = 'block';
+});
+
+// Option 3 click event
+option3.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'You search the room for anything that can help you. You find an old toolbox in the corner. Inside, you find a hammer and a screwdriver. You can only carry one, which one Will be useful?';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'block';
+  option9.style.display = 'block';
+  option10.style.display = 'block';
+});
+
+// Option 4 click event
+option4.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'Going back upstairs is too risky; you can see the gas overwhelming the upper floor. Hurry back to the basement before its too late!';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'block';
+  document.body.style.backgroundImage = "url('images/Stairs.jpg')";
+  document.body.style.backgroundSize = 'cover'
+});
+
+// Option 5 click event
+option5.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'As you approach the radio, you notice that its old and rusty. It doesnt seem to have any power source and the antenna is missing. It looks like it wont be able to help you call for help.';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+});
+
+  // Option 6 click event
+option6.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'What Will be Your Next Move?';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'block';
+  option2.style.display = 'block';
+  option3.style.display = 'block';
+  option4.style.display = 'block';
+  option5.style.display = 'none';
+  option6.style.display = 'none';
+  option7.style.display = 'none';
+  option8.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  option12.style.display = 'none';
+  option13.style.display = 'none';
+  option14.style.display = 'none';
+  document.body.style.backgroundImage = "url('images/Basement.jpg')";
+  document.body.style.backgroundSize = 'cover'
+});
+
+  // Option 7 click event
+  option7.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'As the last piece of glass shatters from the force of the brick, you hear eerie rustling noises emanating from outside. The question lingers in your mind: do you dare to climb out into the unknown?';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'block';
+  option7.style.display = 'none';
+  option8.style.display = 'block';
+});
+
+// Option 8 click event
+option8.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'As you climb out of the broken window, a chilling sensation runs down your spine. You glance up, and your heart stops as you stare into the deathly eyes of a monstrous wolf. Its razor-sharp fangs glisten in the pale moonlight, and a low growl rumbles from its throat. You realize with horror that there is no escape. You have lost, and the wolf is your inevitable doom.';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'none';
+  option7.style.display = 'none';
+  option8.style.display = 'none';
+  document.body.style.backgroundImage = "url('images/Wolf.jpg')";
+  document.body.style.backgroundSize = 'cover'
+  setTimeout(() => {
+    clearInterval(timerInterval);
+  }, 1000);
+  greenGas.remove();
+});
+
+// Option 9 click event
+option9.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'Clutching the hammer, you explore the basement in a frantic search for an escape route as the deadly gas creeps ever closer. With time running out, you feel a mounting sense of dread, knowing that failure means certain doom.';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'block';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'block';
+});
+
+// Option 10 click event
+option10.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'Clutching the Screwdriver, you explore the basement in a frantic search for an escape route as the deadly gas creeps ever closer. With time running out, you feel a mounting sense of dread, knowing that failure means certain doom.';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'block';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option14.style.display = 'block';
+});
+
+// Option 11 click event
+option11.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'You are enveloped in a suffocating darkness, unable to see anything beyond the faint outline of your own trembling hands. Desperate for a source of light, you must click around to find the switch.';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  option12.style.display = 'block';
+  document.body.style.backgroundImage = "url('images/Black.jpg')";
+  document.body.style.backgroundSize = 'cover'
+});
+
+// Option 12 click event
+option12.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'Your eyes widen as you spy an air vent up ahead, a tantalizing glimmer of escape from the horrors of the house. However, your heart sinks as you realize its screwed shut. Do you have the tools to make your way out?';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  option12.style.display = 'none';
+  option13.style.display = 'block';
+  document.body.style.backgroundImage = "url('images/Basement2.jpg')";
+  document.body.style.backgroundSize = 'cover'
+});
+
+// Option 13 click event
+option13.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'With a surge of desperation, you rush towards the air vent and wield the hammer with all your might, but it proves futile. As the gas engulfs the room, youre filled with a sense of crushing hopelessness, knowing your fate is sealed.';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  option12.style.display = 'none';
+  option13.style.display = 'none';
+  greenGas.remove();
+});
+
+// Option 14 click event
+option14.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'You are enveloped in a suffocating darkness, unable to see anything beyond the faint outline of your own trembling hands. Desperate for a source of light, you must click around to find the switch.';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option6.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  option14.style.display = 'none';
+  option15.style.display = 'block';
+  document.body.style.backgroundImage = "url('images/Black.jpg')";
+  document.body.style.backgroundSize = 'cover'
+});
+
+// Option 15 click event
+option15.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'Your eyes widen as you spy an air vent up ahead, a tantalizing glimmer of escape from the horrors of the house. However, your heart sinks as you realize its screwed shut. Do you have the tools to make your way out?';
+  newInfoText2.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  option12.style.display = 'none';
+  option16.style.display = 'block';
+  document.body.style.backgroundImage = "url('images/Basement2.jpg')";
+  document.body.style.backgroundSize = 'cover'
+});
+
+// Option 16 click event
+option16.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'Your hands tremble with adrenaline as you struggle to unscrew the vents hinges. With a final effort, the last screw comes loose, and you waste no time leaping into the safety of the darkness beyond. As you scramble through the vent, you cant help but wonder if this is truly your escape.';
+  newInfoText2.innerHTML = 'Click Anywhere on the Screen to Continue.';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  option12.style.display = 'none';
+  option16.style.display = 'none';
+  option17.style.display = 'block';
+});
+
+// Option 17 click event
+option17.addEventListener('click', () => {
+  inputInfoText.innerHTML = '';
+  newInfoText1.innerHTML = 'Congratulations on your escape! Youre finally free from the horrors of the house and the deadly gas.';
+  newInfoText2.innerHTML = 'Check out your time below aswell as the amount of button clicks taken to see if you can beat it in the next attempt!';
+  clickCount.style.display = 'block';
+  clickCount.innerHTML = '';
+  count++;
+  clickCount.textContent = count;
+  option1.style.display = 'none';
+  option2.style.display = 'none';
+  option3.style.display = 'none';
+  option4.style.display = 'none';
+  option5.style.display = 'none';
+  option9.style.display = 'none';
+  option10.style.display = 'none';
+  option11.style.display = 'none';
+  option12.style.display = 'none';
+  option16.style.display = 'none';
+  option17.style.display = 'none';
+  document.body.style.backgroundImage = "url('images/Victory.jpg')";
+  document.body.style.backgroundSize = 'cover'
+  setTimeout(() => {
+    clearInterval(timerInterval);
+  }, 1000);
+  greenGas.remove();
+});
+    </script>
+  </body>
+</html>
